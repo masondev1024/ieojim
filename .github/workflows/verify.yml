@@ -22,7 +22,9 @@ jobs:
         run: npm run test:unit
       - name: Workers and D1 integration tests
         timeout-minutes: 5
-        run: npm run test:integration -- --reporter=verbose
+        # Keep native console output; avoid cross-context log RPC stalls in the Workers test plugin.
+        # Reassess after https://github.com/cloudflare/workers-sdk/pull/15565 is released.
+        run: npm run test:integration -- --reporter=verbose --disableConsoleIntercept
       - name: Build
         run: npm run build
       - run: npx playwright install --with-deps chromium
