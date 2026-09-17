@@ -11,6 +11,7 @@
 - 기술: TypeScript, React/Vite, Hono, Cloudflare Workers, D1, Queues, Google OAuth/Calendar, Gemini generateContent
 - 상세 포트폴리오 문서: [엔지니어링 케이스 스터디](docs/portfolio/engineering-case-study.md)
 - 구현 상태와 검증 기록: [PLANS.md](PLANS.md)
+- 브랜치 운영과 보호 상태: [브랜치 운영](docs/operations/branch-workflow.md)
 
 ## 문제
 
