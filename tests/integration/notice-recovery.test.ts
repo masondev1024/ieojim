@@ -290,7 +290,11 @@ describe('notice recovery bridge persistence and guards', () => {
       });
       const getConnectedProvider = vi.fn<NonNullable<RecoveryActionDeps['getConnectedProvider']>>();
 
-      expect(await processRecoveryAction(testEnv, actionId, { getConnectedProvider })).toBe('uncertain');
+      expect(await processRecoveryAction(testEnv, actionId, {
+        getConnectedProvider,
+        // Exercise progress validation while the approved event is still in the future.
+        now: () => '2026-09-15T00:00:00.000Z',
+      })).toBe('uncertain');
 
       expect(getConnectedProvider).not.toHaveBeenCalled();
       expect(await testEnv.DB.prepare('SELECT status FROM recovery_actions WHERE id=?').bind(actionId).first('status')).toBe('uncertain');

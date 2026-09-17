@@ -14,7 +14,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run cf:types
-      - run: npm run verify
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Workers and D1 integration tests
+        timeout-minutes: 5
+        run: npm run test:integration -- --reporter=verbose
+      - name: Build
+        run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run eval:live -- --dry-run
