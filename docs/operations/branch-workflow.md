@@ -4,8 +4,9 @@
 
 ## 현재 적용 상태
 
-- 이 작업 폴더에는 `.githooks/pre-push`를 활성화했습니다. 원격 목적지가 `refs/heads/main`이면 푸시를 거절합니다. `dev:main`, 강제 푸시, 삭제도 포함합니다.
-- 로컬 설정은 `core.hooksPath=.githooks`, `push.default=simple`입니다. 전역 Git 설정은 변경하지 않습니다.
+- 이 작업 폴더에는 `.githooks/pre-push`의 사본을 Git 기본 훅 폴더에 설치했습니다. 원격 목적지가 `refs/heads/main`이면 푸시를 거절합니다. `dev:main`, 강제 푸시, 삭제도 포함합니다.
+- 훅은 브랜치를 바꿔도 남는 Git 메타데이터 폴더에 둡니다. 훅 파일이 아직 없는 `main`으로 체크아웃해도 보호가 사라지지 않습니다. 원본을 변경하면 설치된 사본도 검토 후 갱신해야 합니다.
+- 로컬 설정은 `push.default=simple`입니다. 별도 `core.hooksPath`나 전역 Git 설정은 추가하지 않습니다.
 - **GitHub 서버 보호는 아직 적용되지 않았습니다.** 2026-09-17 현재 비공개 저장소의 보호 API가 요금제 제한으로 HTTP 403을 반환합니다.
 - 로컬 훅은 다른 복제본, GitHub 웹/API, 훅을 건너뛰는 명령을 차단하지 못합니다. 서버 보호를 대체하는 보안 경계로 취급하면 안 됩니다.
 
@@ -13,9 +14,10 @@
 
 ```sh
 git config --show-origin --get core.hooksPath
-git config --local core.hooksPath .githooks
-git config --local push.default simple
 git switch dev
+hook_path="$(git rev-parse --git-path hooks/pre-push)"
+test ! -e "$hook_path" && install -m 755 .githooks/pre-push "$hook_path"
+git config --local push.default simple
 ```
 
 ## 서버 보호 설정안
