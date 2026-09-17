@@ -1,0 +1,21 @@
+.materials-demo { margin-top: 1.1rem; min-width: 0; }
+.materials-demo button { min-height: 44px; border: 1px solid #b4c9be; border-radius: 10px; padding: .65rem .85rem; font: inherit; font-weight: 600; cursor: pointer; background: #fffdf7; color: #174538; }
+.materials-demo button:focus-visible, .landing-protection-demo summary:focus-visible { outline: 3px solid #2e7962; outline-offset: 3px; }
+.materials-demo .materials-demo__start { display: flex; width: 100%; justify-content: space-between; align-items: center; background: #174538; color: #fffdf7; }
+.materials-demo__changes article { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: .65rem; padding: .75rem 0; border-top: 1px solid #d9e1d9; }
+.materials-demo__changes article > span { font-size: .8rem; color: #516c60; }
+.materials-demo__changes p { display: grid; gap: .3rem; margin: 0; font-size: .88rem; overflow-wrap: anywhere; }
+.materials-demo__changes s { color: #69746c; }
+.materials-demo__changes em { color: #825413; font-size: .8rem; font-style: normal; }
+.materials-demo__explanation, .materials-demo details { font-size: .85rem; line-height: 1.65; color: #3d574a; }
+.materials-demo summary { cursor: pointer; min-height: 44px; align-content: center; }
+.materials-demo blockquote { margin: .4rem 0; padding-left: .75rem; border-left: 2px solid #8fab98; }
+.materials-demo__choices { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+.materials-demo__choices [aria-pressed=true] { background: #174538; color: #fffdf7; }
+.materials-demo__result { padding: .85rem; background: #e4efe5; border-radius: 10px; margin-top: .75rem; font-size: .9rem; }
+.materials-demo__result p { font-size: .82rem; line-height: 1.6; }
+.materials-demo__result button { display: inline-flex; align-items: center; gap: .4rem; }
+.landing-protection-demo { max-width: 1200px; margin: 0 auto; padding: 1rem clamp(1rem, 4vw, 3rem); }
+.landing-protection-demo > summary { cursor: pointer; min-height: 44px; align-content: center; font-weight: 600; color: #244b3b; }
+.landing-protection-demo > p { line-height: 1.7; color: #53695e; }
+@media (max-width: 420px) { .materials-demo__changes article { grid-template-columns: 1fr; gap: .35rem; } .materials-demo__choices button { width: 100%; } }

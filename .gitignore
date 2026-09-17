@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+!.env.example
+.omx/
+.DS_Store
+playwright-report/
+test-results/
+coverage/
+artifacts/
+# Local submission export; versioned captures live in docs/submission/assets/.
+/대표 이미지.png

@@ -1,0 +1,49 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ieojim-local",
+  "main": "src/server/index.ts",
+  "compatibility_date": "2026-09-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+  "d1_databases": [{ "binding": "DB", "database_name": "ieojim-local", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
+  "queues": {
+    "producers": [{ "binding": "RUN_QUEUE", "queue": "ieojim-runs-local" }],
+    "consumers": [{ "queue": "ieojim-runs-local", "max_batch_size": 1, "max_batch_timeout": 1, "max_retries": 3, "max_concurrency": 1 }]
+  },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": { "APP_ENV": "development", "MODEL": "gemini-3.8-flash", "DAILY_BUDGET_MICRO_USD": "500000", "TOTAL_BUDGET_MICRO_USD": "15000000", "OWNER_DAILY_RUNS": "10" },
+  "observability": { "enabled": true, "head_sampling_rate": 1, "redact_query_string": true },
+  "env": {
+    "staging": {
+      "account_id": "d77fd515103009a324bebb3ac5b81fd9",
+      "name": "ieojim-staging",
+      "workers_dev": true,
+      "routes": [{ "pattern": "ieojim.jungseongheon.org", "custom_domain": true }],
+      "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+      "d1_databases": [{ "binding": "DB", "database_name": "ieojim-staging", "database_id": "53421a70-d819-4ae6-9eb5-f558a119ea6b", "migrations_dir": "migrations" }],
+      "queues": {
+        "producers": [{ "binding": "RUN_QUEUE", "queue": "ieojim-runs-staging" }],
+        "consumers": [{ "queue": "ieojim-runs-staging", "max_batch_size": 1, "max_batch_timeout": 1, "max_retries": 3, "max_concurrency": 1 }]
+      },
+      "ratelimits": [{ "name": "PUBLIC_WRITES", "namespace_id": "26090901", "simple": { "limit": 60, "period": 60 } }],
+      "triggers": { "crons": ["*/5 * * * *"] },
+      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://ieojim.jungseongheon.org", "MODEL": "gemini-3.8-flash", "DAILY_BUDGET_MICRO_USD": "2500000", "TOTAL_BUDGET_MICRO_USD": "15000000", "OWNER_DAILY_RUNS": "10" },
+      "observability": { "enabled": true, "head_sampling_rate": 1, "redact_query_string": true }
+    },
+    "production": {
+      "account_id": "d77fd515103009a324bebb3ac5b81fd9",
+      "name": "ieojim",
+      "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+      // Replace with the real production D1 UUID after creating the resource.
+      "d1_databases": [{ "binding": "DB", "database_name": "ieojim-production", "database_id": "00000000-0000-0000-0000-000000000102", "migrations_dir": "migrations" }],
+      "queues": {
+        "producers": [{ "binding": "RUN_QUEUE", "queue": "ieojim-runs-production" }],
+        "consumers": [{ "queue": "ieojim-runs-production", "max_batch_size": 1, "max_batch_timeout": 1, "max_retries": 3, "max_concurrency": 1 }]
+      },
+      "ratelimits": [{ "name": "PUBLIC_WRITES", "namespace_id": "26090902", "simple": { "limit": 60, "period": 60 } }],
+      "triggers": { "crons": ["*/5 * * * *"] },
+      "vars": { "APP_ENV": "production", "MODEL": "gemini-3.8-flash", "DAILY_BUDGET_MICRO_USD": "500000", "TOTAL_BUDGET_MICRO_USD": "15000000", "OWNER_DAILY_RUNS": "10" },
+      "observability": { "enabled": true, "head_sampling_rate": 1, "redact_query_string": true }
+    }
+  }
+}

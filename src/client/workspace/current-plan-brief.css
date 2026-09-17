@@ -1,0 +1,58 @@
+.current-plan-brief {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.current-plan-brief h3 { margin: 0 0 8px; }
+.current-plan-brief p { margin: 0; line-height: 1.6; }
+
+.current-plan-brief__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.current-plan-brief__notes {
+  display: inline-flex;
+  flex: 1 1 140px;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted, #69756e);
+  font-size: 0.88rem;
+  font-weight: 800;
+  min-height: 44px;
+  min-width: 0;
+}
+
+.workspace-app .current-plan-brief__notes input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 0;
+  padding: 0;
+}
+
+.current-plan-brief__preview {
+  min-height: 220px;
+  font-family: inherit;
+  white-space: pre-wrap;
+}
+
+.current-plan-brief__copy {
+  width: fit-content;
+}
+
+@media (max-width: 520px) {
+  .current-plan-brief__actions,
+  .current-plan-brief__copy {
+    width: 100%;
+  }
+
+  .current-plan-brief__actions .ghost-button,
+  .current-plan-brief__notes,
+  .current-plan-brief__copy {
+    width: 100%;
+  }
+}

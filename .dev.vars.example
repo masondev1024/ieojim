@@ -1,0 +1,10 @@
+# Copy to .dev.vars for local development only. Do not commit .dev.vars.
+# Staging/production must use `wrangler secret put GEMINI_API_KEY --env <env>`.
+GEMINI_API_KEY=
+
+# Optional Google account login. Keep every value server-side.
+# Until all four values are configured, guest use remains available.
+BETTER_AUTH_URL=http://127.0.0.1:5173
+BETTER_AUTH_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

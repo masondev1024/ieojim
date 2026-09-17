@@ -1,0 +1,87 @@
+{
+  "baseUrl": "https://ieojim.jungseongheon.org",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "generatedAt": "2026-09-13T15:43:03.876Z",
+  "createdWorkspaceIds": [
+    "ws_4b04b547ba0a4775b2ace3cf5e45d98d"
+  ],
+  "cleanup": {
+    "attempted": 1,
+    "deleted": 1
+  },
+  "screenshots": [
+    {
+      "order": 1,
+      "file": "01-departure-hero.png",
+      "title": "대표 랜딩: 출발 전날 변경과 보호된 결정",
+      "url": "https://ieojim.jungseongheon.org/",
+      "width": 1600,
+      "height": 900,
+      "sha256": "88fa1d776f70caa42f6e6f95cf825e47ba9a369c2cbde69e126a095d5a026ff1",
+      "describesSynthetic": true,
+      "capturedAt": "2026-09-13T15:42:51.728Z"
+    },
+    {
+      "order": 2,
+      "file": "02-departure-explicit-start.png",
+      "title": "명시적 시작: 출발 전날 합성 체험 생성 전",
+      "url": "https://ieojim.jungseongheon.org/app?example=departure",
+      "width": 1600,
+      "height": 900,
+      "sha256": "0faf06b53e196db4c61c1f4c417dbabca16b0ade0526e7af4a89b568bb932c7e",
+      "describesSynthetic": true,
+      "capturedAt": "2026-09-13T15:42:53.059Z"
+    },
+    {
+      "order": 3,
+      "file": "03-departure-seeded-plan.png",
+      "title": "저장된 예시: 잠근 저녁, 완료한 준비, 직접 고친 메모",
+      "url": "https://ieojim.jungseongheon.org/app/workspaces/ws_4b04b547ba0a4775b2ace3cf5e45d98d",
+      "width": 1600,
+      "height": 900,
+      "sha256": "01d90231a4e31d49933016e9600d9ed45673e1704aa5d232c99babc3a56c5481",
+      "describesSynthetic": true,
+      "capturedAt": "2026-09-13T15:42:54.508Z"
+    },
+    {
+      "order": 4,
+      "file": "04-departure-two-conflicts.png",
+      "title": "변경 검토: 둘째 날 저녁과 종이 확인서 두 선택",
+      "url": "https://ieojim.jungseongheon.org/app/workspaces/ws_4b04b547ba0a4775b2ace3cf5e45d98d",
+      "width": 1600,
+      "height": 900,
+      "sha256": "d5504d1b2ffab2dfad766332fc4075a8a0a024b4fb57d194cf92f9c576e3501f",
+      "describesSynthetic": true,
+      "capturedAt": "2026-09-13T15:42:57.568Z"
+    },
+    {
+      "order": 5,
+      "file": "05-departure-applied-brief.png",
+      "title": "반영 결과: 저녁 유지, 완료 항목 삭제, 현재 계획 브리프",
+      "url": "https://ieojim.jungseongheon.org/app/workspaces/ws_4b04b547ba0a4775b2ace3cf5e45d98d",
+      "width": 1600,
+      "height": 900,
+      "sha256": "578676c897fa01965bcb604fe5a1ea340b04a0dce798464d59f7039d170e531d",
+      "describesSynthetic": true,
+      "capturedAt": "2026-09-13T15:43:01.847Z"
+    }
+  ],
+  "deployedVersion": "a5e60901-2312-427a-961f-7d34784643bb",
+  "visualReview": {
+    "root": [
+      1,
+      2,
+      3
+    ],
+    "independent": [
+      4,
+      5
+    ],
+    "verdict": "PASS",
+    "report": ".omx/reviews/departure-submission-visual-2026-09-14.md",
+    "scope": "Readable key content in actual 1600x900 viewport captures; longer pages continue below viewport."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "origin": "https://ieojim.jungseongheon.org",
+  "deploymentVersion": "a6eba611-ebfb-4063-8f40-76223e74e7c9",
+  "capturedAt": "2026-09-15T08:18:33.865Z",
+  "locale": "ko-KR",
+  "screenshots": [
+    {
+      "file": "01-hero.png",
+      "caption": "첫 화면: 바뀐 안내와 지켜야 할 내 결정",
+      "width": 1600,
+      "height": 900,
+      "sha256": "f771195c99187b69331e4a6f3da3beeb25703a144a963a89f09c0c453657faac",
+      "sourceFile": "artifacts/final-copy-2026-09-15/public/01-home-1600-viewport.png",
+      "preparedExample": true
+    },
+    {
+      "file": "02-schedule-adjustment.png",
+      "caption": "체험용 일정: 준비·이동·다른 업무를 함께 조정",
+      "width": 1600,
+      "height": 900,
+      "sha256": "6671c28981914ab17e260cf0e2276f489bc00e21b59068ac5ab7852608e21c09",
+      "sourceFile": "artifacts/final-copy-2026-09-15/public/13-recovery-1600-viewport.png",
+      "preparedExample": true
+    },
+    {
+      "file": "03-blocked-conditions.png",
+      "caption": "조건을 만족할 수 없을 때 기존 일정을 유지",
+      "width": 1600,
+      "height": 900,
+      "sha256": "3cae01bc182c737c67979ef8272df457a8bf65b2428e144c3573173a0bed654d",
+      "sourceFile": "artifacts/final-copy-2026-09-15/public/19-blocked-1600-viewport.png",
+      "preparedExample": true
+    },
+    {
+      "file": "04-change-review.png",
+      "caption": "원문 근거와 고정·완료 상태를 확인",
+      "width": 1600,
+      "height": 900,
+      "sha256": "2d87d24be0dc2d41d14c0c95f2f099ba77eada56a3e423ac2742f3a25f60c53b",
+      "sourceFile": "artifacts/final-copy-2026-09-15/public/16-change-review-1600-viewport.png",
+      "preparedExample": true
+    },
+    {
+      "file": "05-saved-plan.png",
+      "caption": "사용자 선택을 반영한 저장 계획",
+      "width": 1600,
+      "height": 900,
+      "sha256": "18011b6232550fafa085323e5d1e382f055dc77df3f3da276514477a4d1652c4",
+      "sourceFile": "artifacts/final-copy-2026-09-15/public/17-approved-plan-1600-viewport.png",
+      "preparedExample": true
+    }
+  ],
+  "cleanup": [
+    {
+      "id": "ws_ce8045e5b7ca42ffa14504a0d0870c4f",
+      "deleteStatus": 204,
+      "readStatus": 404
+    }
+  ],
+  "noLiveModelCall": true,
+  "noCalendarOrEmailExecution": true
+}

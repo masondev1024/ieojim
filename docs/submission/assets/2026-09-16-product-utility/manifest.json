@@ -1,0 +1,10 @@
+{
+  "origin": "https://ieojim.jungseongheon.org",
+  "capturedAt": "2026-09-16T01:03:52.257Z",
+  "deployedVersion": "e80f2edd-d6f0-40f7-8573-25c18d12cb8a",
+  "file": "01-hero.png",
+  "width": 1600,
+  "height": 900,
+  "sha256": "428e836dd507c75aba1107e15cb926706efd0ff96732783245ff52cdafb96987",
+  "description": "Actual deployed first viewport; prepared example, no live AI or storage in hero."
+}

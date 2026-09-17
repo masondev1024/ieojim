@@ -1,0 +1,33 @@
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'; upgrade-insecure-requests
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), geolocation=(), microphone=(), payment=(), usb=()
+
+# Prevent automatic script injection on HTML entry points. Scope this to HTML:
+# no-transform also disables edge compression of large JavaScript/CSS assets.
+/
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/app
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/app/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/login
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/login/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/settings
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/settings/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/privacy
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/privacy/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/terms
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/terms/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform

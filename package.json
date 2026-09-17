@@ -1,0 +1,78 @@
+{
+  "name": "ieojim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,api \"vite --host 127.0.0.1\" \"wrangler dev --port 8787\"",
+    "dev:api": "wrangler dev --port 8787",
+    "dev:e2e": "node --import tsx scripts/dev-e2e.ts",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "test:staging": "playwright test --config playwright.staging.config.ts",
+    "test:domain": "playwright test --config playwright.domain.config.ts",
+    "verify": "npm run typecheck && npm run lint && npm run test:unit && npm run test:integration && npm run build",
+    "eval:live": "tsx scripts/eval-live.ts",
+    "eval:feedback": "tsx scripts/eval-feedback.ts",
+    "loop": "tsx scripts/loop.ts",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "ops:local": "wrangler d1 execute DB --local --file scripts/ops-status.sql",
+    "ops:capacity": "tsx scripts/admission-capacity.ts",
+    "ops:staging:plan": "tsx scripts/staging-operational-drill.ts --target=staging --mode=plan",
+    "ops:staging:read-only": "tsx scripts/staging-operational-drill.ts --target=staging --mode=read-only",
+    "ops:staging:expiry-drill": "tsx scripts/staging-operational-drill.ts --target=staging --mode=expiry --allow-remote-mutation",
+    "ops:staging:timeout-drill": "tsx scripts/staging-operational-drill.ts --target=staging --mode=timeout --allow-remote-mutation",
+    "cf:types": "CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=true CLOUDFLARE_INCLUDE_PROCESS_ENV=false wrangler types --env-file .dev.vars.example",
+    "cf:readiness": "node --import tsx scripts/deploy-readiness.ts --target=staging --allow-unprovisioned && node --import tsx scripts/deploy-readiness.ts --target=production --allow-unprovisioned",
+    "release:prepare": "npm run build && wrangler deploy --dry-run --env=\"\" --outdir artifacts/release-candidate/worker && node --import tsx scripts/release-manifest.ts",
+    "deploy:check": "npm run deploy:check:local",
+    "deploy:check:local": "npm run build && wrangler deploy --dry-run --env=\"\"",
+    "deploy:check:staging": "npm run build && node --import tsx scripts/deploy-readiness.ts --target=staging && wrangler deploy --dry-run --env staging",
+    "deploy:check:production": "npm run build && node --import tsx scripts/deploy-readiness.ts --target=production && wrangler deploy --dry-run --env production"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.7.0",
+    "better-auth": "1.7.3",
+    "hono": "4.13.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "7.18.3",
+    "three": "0.186.0",
+    "zod": "4.5.4"
+  },
+  "overrides": {
+    "miniflare": {
+      "sharp": "0.35.4"
+    }
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.5",
+    "@cloudflare/workers-types": "5.20260907.1",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/three": "0.185.4",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/runner": "4.1.11",
+    "@vitest/snapshot": "4.1.11",
+    "concurrently": "^10.0.5",
+    "eslint": "10.10.0",
+    "lucide-react": "^1.42.0",
+    "playwright": "^1.63.0",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.69.0",
+    "vite": "^8.2.2",
+    "vitest": "4.1.11",
+    "wrangler": "^4.129.1"
+  }
+}
