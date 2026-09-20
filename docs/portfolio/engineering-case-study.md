@@ -146,6 +146,14 @@ Calendar action은 실행 전에 account ownership, connection version, scope, �
 
 실제 Calendar는 과거 승인 실행 1건에서 4개 합성 event를 검증한 근거가 있습니다. 최신 date-input checkpoint에서 전체 real-provider QA를 다시 실행한 것은 아닙니다. Email live send는 아직 검증하지 않았습니다.
 
+### 6. 실행 기록과 나중의 관찰 분리
+
+9월 19일 로컬 후보는 `recovery_actions`의 성공 이력과 `recovery_calendar_verifications`의 최신 관찰을 나눕니다. "한 번 저장했다"와 "지금도 승인한 내용인가"는 다른 데이터이기 때문입니다. 새 관찰은 승인 action/payload hash, 원문·내용·조건 revision, 연결 auth version에 묶입니다. 조회가 끝나도 이 기준이 바뀌었으면 DB의 조건부 UPDATE가 정상 결과 게시를 거절합니다.
+
+사용자가 동의한 경우에만 15분 간격으로 읽기 전용 확인을 예약하며 최대 24시간 후 종료합니다. 이는 모델이 스스로 일정을 수정하는 루프가 아니라 **승인된 값과 외부 상태의 차이를 찾아 사람이 다시 판단할 수 있도록 하는 대조 처리**입니다. 중복 cron은 claim token으로 직렬화하고, 취소·인증 해제·만료·3회 연속 실패를 별도 중지 원인으로 남깁니다. 보관 기간은 늘리지 않습니다.
+
+데이터 품질 관점에서 결과에는 확인 시각과 범위가 필요합니다. 여러 Google 이벤트 조회는 원자적 snapshot이 아니므로 영구적인 일치나 전체 계정의 정합성을 보장하지 않습니다. 현재 5분 cron당 5건 제한은 비용과 외부 API 부하를 제어하지만, 사용자 증가 시 예약 지연이 생길 수 있습니다. 다음 확장 기준은 watch backlog와 지연이며, 무조건적인 streaming/CDC 도입이 아닙니다. [구현](../../src/server/recovery/verification.ts) · [경합 회귀 테스트](../../tests/integration/recovery-verification.test.ts) · [운영 한도](../operations/calendar-verification-2026-09-19.md)
+
 ## 운영 관찰
 
 `collectOpsHealth`는 pending/running/uncertain run, budget policy violation, storage usage, reconciliation delta, daily admission count를 읽어 severity와 check code를 만듭니다. `npm run ops:local`은 local D1 상태를 확인합니다. 외부 alert delivery는 아직 연결되지 않았고, 기준은 [alert-readiness.md](../runbooks/alert-readiness.md)에 있습니다.

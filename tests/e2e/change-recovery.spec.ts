@@ -89,6 +89,7 @@ test('persisted recovery clears private content when the signed-in identity chan
   try {
     await page.goto(`/recovery/${saved.workspaceId}`);
     await expect(page.getByRole('button', { name: '조정안 적용하기' })).toBeEnabled();
+    await page.getByText('이메일 작성·확인', { exact: true }).click();
     await page.getByLabel('수신자', { exact: true }).fill('private-draft@example.test');
     await setAccount(6);
     await page.evaluate(() => window.dispatchEvent(new Event('focus')));

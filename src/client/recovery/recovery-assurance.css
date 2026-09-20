@@ -1,0 +1,115 @@
+.recovery-assurance {
+  display: grid;
+  gap: 14px;
+  margin: 18px auto 20px;
+  border: 1px solid rgba(16, 32, 26, 0.11);
+  border-radius: 12px;
+  padding: clamp(14px, 2vw, 18px);
+  background: rgba(255, 253, 247, 0.78);
+}
+
+.recovery-assurance h2 {
+  margin: 0;
+  color: #14231d;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.4vw, 1.22rem);
+  line-height: 1.35;
+}
+
+.recovery-assurance > p {
+  max-width: 760px;
+  margin: -6px 0 0;
+  color: #4d6057;
+  font-size: .92rem;
+  line-height: 1.65;
+}
+
+.recovery-assurance ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recovery-assurance li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid rgba(16, 32, 26, 0.08);
+  border-radius: 9px;
+  padding: 10px;
+  background: #fbf7ee;
+}
+
+.recovery-assurance li > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  background: #eef2ec;
+  color: #53645b;
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 850;
+}
+
+.recovery-assurance strong {
+  display: block;
+  color: #14231d;
+  font-size: .88rem;
+  line-height: 1.42;
+}
+
+.recovery-assurance small {
+  display: block;
+  margin-top: 3px;
+  color: #5d6b63;
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+.recovery-assurance [data-state="done"] {
+  border-color: rgba(13, 111, 81, 0.2);
+  background: #eef8f1;
+}
+
+.recovery-assurance [data-state="done"] > span {
+  background: #ddefe4;
+  color: #176441;
+}
+
+.recovery-assurance [data-state="attention"] {
+  border-color: rgba(216, 172, 90, 0.42);
+  background: #fff8e8;
+}
+
+.recovery-assurance [data-state="attention"] > span,
+.recovery-assurance [data-state="attention"] strong {
+  color: #92411a;
+}
+
+.recovery-assurance [data-state="pending"] {
+  border-color: rgba(36, 80, 121, 0.16);
+  background: #edf4fb;
+}
+
+@media (max-width: 760px) {
+  .recovery-assurance ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .recovery-assurance {
+    gap: 12px;
+    padding: 13px;
+  }
+
+  .recovery-assurance ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -6,6 +6,7 @@ import ApprovedChangeCopy from './ApprovedChangeCopy';
 import WorkspaceStart from './WorkspaceStart';
 import CurrentPlanBrief from './CurrentPlanBrief';
 import PreparationBoard from './PreparationBoard';
+import SourceClipboardImport from './SourceClipboardImport';
 import { readStartContext, type StartTemplate } from './workspace-start-context';
 import {
   AlertTriangle,
@@ -1233,6 +1234,15 @@ function SourceComposer(props: {
   return (
     <form className="source-composer" onSubmit={(event) => { event.preventDefault(); props.onSubmit(); }}>
       <h3>원문 붙여넣기</h3>
+      <SourceClipboardImport
+        key={props.view.id}
+        scopeKey={`${props.view.id}:${props.answerContext?.changeSetId ?? 'source'}:${relation}:${props.targetSourceId ?? ''}`}
+        disabled={props.disabled}
+        maxLength={props.sourceLimit}
+        hasDraft={props.sourceText.length > 0}
+        draftVersion={props.sourceText}
+        onImport={props.onText}
+      />
       {props.answerContext ? (
         <div className="question-box" aria-label="답변 중인 확인 질문">
           <strong>확인 질문에 답변 중</strong>

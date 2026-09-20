@@ -1,9 +1,24 @@
 # Design
 
+## September 19 visual critique — current UI direction
+
+- [UI repair contract](docs/design/ui-critic-2026-09-19.md) governs this local refinement and supersedes earlier requirements for simultaneous narrow mobile columns or always-expanded email fields. The product positioning, protections and approval boundaries remain intact.
+- Recovery leads with calculated event changes and protected appointments; original notice/evidence is a disclosure. Dirty/blocked results cannot display that success list. A shared centred shell contains hero, progress, comparison and actions.
+- Desktop compares two timelines. Mobile shows one readable timeline and explicit before/after selectors. Email composition is optional and collapsed until requested; exact approval still follows its fields. Actual Calendar observations and failures stay visible.
+- Preserve SUIT, warm paper and forest-green accents. Keep one visually primary next action; avoid adding more summary panels to solve density. Actual 320/390/1440 screenshots, enlarged-text behaviour and independent reviews are required alongside regression tests.
+
+## September 19 change assurance
+
+- The approved local candidate is [change-assurance-2026-09-19.md](docs/design/change-assurance-2026-09-19.md). Selected clipboard text requires explicit read, preview and import; an existing draft requires a separate replacement confirmation. No automatic clipboard access or AI call on import.
+- Recovery shows calculation, local approval, Calendar execution and later observation separately. Historical verified writes remain historical. Latest drift/unavailable/stale observations require attention and cannot be styled as current success.
+- After an exact verified Calendar action, manual recheck and explicit opt-in read-only 15-minute/max-24-hour watch are available. No external write is triggered by this panel. Visible consent, an always-available stop for active watches (unless a request is busy), last-check time and bounded expiry are required.
+- Source changes, stale approvals, disconnected credentials, missed reads and partial observations remain distinct. Event details use progressive disclosure and the existing warm-paper/green design at 320px and desktop widths.
+- Live provider verification and deployment remain separate from local mock-provider tests. Keep the broader browser-executor and proactive mailbox-ingestion roadmap out of implemented product claims.
+
 ## Source of truth
 - Active direction, 2026-09-14: the competition product addresses changed notices across work, study and personal life. Corporate assistants are one use case and an adoption hypothesis. `docs/design/submission-positioning-2026-09-14.md` supersedes the earlier industry-first positioning. The broad landing/entry refresh is locally implemented; current `/assistants` and coordination implementation remain local, and the public departure story remains the deployed evidence.
 - Status: D1–D3, accounts/explicit guest transfer, account usage/export and Google activation are verified (see `PLANS.md`). The September 14 departure story supersedes the prior hero and is deployed to the existing canonical service; delivery evidence is in `PLANS.md`. Commercial lifecycle remains future work.
-- Last refreshed: 2026-09-15. Dense-schedule recovery adds visible impact, actual bounded rescheduling and separately approved external execution in the local candidate.
+- Last refreshed: 2026-09-19. Recovery adds separately approved external execution, later read-only observation, and the visual critique above in the local candidate. `PLANS.md` owns the deployed version and validation status.
 - Primary product surfaces: introduction, guided first use, workspace home, editable plan, contextual review, login/settings, current-data export and future billing.
 - Current implementation: anonymous same-browser workspace with a landing route, home, deep-linked workspaces, scoped CSS and interaction-gated WebGL2. Google account/session adapter, explicit guest transfer, account usage display and JSON v1 current-plan/source export are implemented; no billing. Actual Google provider roundtrip was verified on September 10.
 - Evidence: AGENTS.md, PLANS.md, AppRouter.tsx, landing/, workspace/, scene/, core contracts/engine, server ownership/retention, premium browser screenshots and .omx/verification-premium-frontend.json. Historical concept remains separate from screenshots.

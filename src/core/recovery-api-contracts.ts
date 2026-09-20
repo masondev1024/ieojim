@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { NoticeRecoveryOrigin } from './notice-recovery';
+import type { CalendarVerificationView } from './recovery-verification-contracts';
 import { recoveryInputSchema, type RecoveryInput, type RecoveryResult } from './scheduling-contracts';
 
 export const recoveryActionStatusSchema = z.enum(['queued', 'executing', 'verified', 'accepted', 'uncertain', 'conflict', 'failed', 'cancelled']);
@@ -10,8 +11,12 @@ export type RecoveryActionView = {
   status: RecoveryActionStatus;
   message: string;
   createdAt: string;
+  baseRevision?: number;
+  sourceRevision?: number;
+  conditionRevision?: number;
   verifiedEvents?: number;
   totalEvents?: number;
+  verification?: CalendarVerificationView;
 };
 export type RecoveryView = {
   workspaceId: string;

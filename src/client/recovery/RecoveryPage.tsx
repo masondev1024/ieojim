@@ -7,6 +7,10 @@ import { defaultRecoveryApi, recoveryFailureMessage, type RecoveryApi } from './
 import { buildEmailDraft, createLocalRecoveryPlan, createRecoveryInput, defaultRecoveryDraft, draftFromRecoveryInput, invalidateApproval, planFromRecoveryView, planSignature } from './recovery-model';
 import type { CalendarConnectionSummary, ExternalActionStatus, PreviewStatus, RecoveryActionView, RecoveryDraft, RecoveryEvent, RecoveryMode, RecoveryPlan, SaveStatus } from './recovery-types';
 import type { RecoveryInput } from '../../core/scheduling-contracts';
+import CalendarVerificationPanel from './CalendarVerificationPanel';
+import RecoveryAssurance from './RecoveryAssurance';
+import RecoveryImpact from './RecoveryImpact';
+import { actionMatchesPlan, latestCalendarAction } from './recovery-assurance';
 import './recovery.css';
 
 type RecoveryPageProps = {
@@ -99,10 +103,23 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
     return { recipient: draftEmail.recipient, subject: draftEmail.title, body: draftEmail.body };
   });
   const [emailTouched, setEmailTouched] = useState(false);
+  const [timelineView, setTimelineView] = useState<'after' | 'before'>('after');
   const [emailExactApproved, setEmailExactApproved] = useState(false);
   const requestTokenRef = useRef(0);
   const previewTokenRef = useRef(0);
   const latestDraftSignatureRef = useRef(planSignature(defaultRecoveryDraft));
+  const verificationRequestRef = useRef<AbortController | null>(null);
+  const verificationEpochRef = useRef(0);
+  const verificationScopeRef = useRef('');
+  verificationScopeRef.current = `${workspaceId ?? ''}:${plan.server?.workspaceId ?? ''}:${revision}:${plan.server?.sourceRevision}:${plan.server?.conditionRevision}:${latestCalendarAction(plan.server)?.id ?? ''}`;
+
+  useEffect(() => {
+    setBusyAction(null);
+    return () => {
+      verificationRequestRef.current?.abort();
+      verificationRequestRef.current = null;
+    };
+  }, [workspaceId]);
 
   useEffect(() => {
     if (workspaceId) return;
@@ -155,12 +172,20 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
   }, [api]);
 
   useEffect(() => {
-    if (!activeWorkspaceId || !plan.server?.actions.some((action) => action.status === 'queued' || action.status === 'executing')) return;
+    const actions = plan.server?.actions ?? [];
+    const executing = actions.some((action) => action.status === 'queued' || action.status === 'executing' || action.verification?.status === 'checking');
+    if (!activeWorkspaceId || (!executing && !actions.some((action) => action.verification?.watch.enabled))) return;
     const controller = new AbortController();
+    let pending = false;
     const timer = window.setInterval(() => {
+      if (pending || verificationRequestRef.current || document.visibilityState === 'hidden') return;
+      pending = true;
+      const verificationEpoch = verificationEpochRef.current;
       api.loadWorkspaceRecovery(activeWorkspaceId, controller.signal).then((payload) => {
+        if (controller.signal.aborted || verificationEpochRef.current !== verificationEpoch || payload.workspaceId !== activeWorkspaceId) return;
         const nextPlan = planFromRecoveryView(payload);
         setPlan((current) => {
+          if (controller.signal.aborted || verificationEpochRef.current !== verificationEpoch) return current;
           if (current.server && planSignature(current.draft) !== planSignature(draftFromRecoveryInput(current.server.input))) {
             return { ...current, server: { ...current.server, actions: payload.actions }, external: nextPlan.external };
           }
@@ -170,11 +195,12 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
           return nextPlan;
         });
       }).catch((error) => {
+        if (controller.signal.aborted || verificationEpochRef.current !== verificationEpoch) return;
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setMessage(recoveryFailureMessage(error, '외부 처리 기록을 다시 확인하지 못했습니다.'));
         }
-      });
-    }, 3_000);
+      }).finally(() => { pending = false; });
+    }, executing ? 3_000 : 30_000);
     return () => {
       controller.abort();
       window.clearInterval(timer);
@@ -194,7 +220,10 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
   const canSave = mode === 'local' && plan.feasible && !isRequestBusy;
   const canPreviewPersisted = Boolean(activeWorkspaceId && revision !== null && plan.server && isDirty && !isRequestBusy);
   const canApprovePersisted = Boolean(activeWorkspaceId && revision !== null && plan.server && plan.feasible && !plan.approval.approved && !isDirty && !isRequestBusy);
-  const canQueueCalendar = Boolean(activeWorkspaceId && revision !== null && plan.server && plan.approval.approved && plan.feasible && !isDirty && !isRequestBusy && calendar?.status === 'connected' && plan.external.calendar !== 'pending' && plan.external.calendar !== 'applied');
+  const latestCalendar = latestCalendarAction(plan.server);
+  const alreadyWritten = Boolean(latestCalendar?.status === 'verified' && plan.server && actionMatchesPlan(latestCalendar, plan.server));
+  const verificationAction = latestCalendar?.status === 'verified' ? latestCalendar : undefined;
+  const canQueueCalendar = Boolean(activeWorkspaceId && revision !== null && plan.server && plan.approval.approved && plan.feasible && !isDirty && !isRequestBusy && !alreadyWritten && calendar?.status === 'connected' && plan.external.calendar !== 'pending' && plan.external.calendar !== 'applied');
   const hasGmailScope = Boolean(calendar?.scopes.includes('https://www.googleapis.com/auth/gmail.send'));
   const emailValidation = validateEmailFields(emailFields);
   const canQueueEmail = Boolean(activeWorkspaceId && revision !== null && plan.server && plan.approval.approved && plan.feasible && !isDirty && !isRequestBusy && hasGmailScope && emailExactApproved && emailValidation.ok && plan.external.email !== 'pending' && plan.external.email !== 'applied');
@@ -480,7 +509,44 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
     }
   }
 
-  if (workspaceId && !plan.server) {
+  async function verifyCalendar(action: RecoveryActionView, enabled?: boolean) {
+    if (!activeWorkspaceId || revision === null || !plan.server || isRequestBusy || verificationRequestRef.current) return;
+    if (enabled !== false && (isDirty || !actionMatchesPlan(action, plan.server) || calendar?.status !== 'connected')) return;
+    const scope = verificationScopeRef.current;
+    // Invalidate reads started before this intent, even before React effect cleanup.
+    verificationEpochRef.current += 1;
+    const controller = new AbortController();
+    verificationRequestRef.current = controller;
+    const timer = window.setTimeout(() => controller.abort(), 40_000);
+    setBusyAction('calendar-verification');
+    setMessage(null);
+    const command = { workspaceId: activeWorkspaceId, actionId: action.id, baseRevision: revision, conditionRevision: plan.server.conditionRevision, requestId: crypto.randomUUID() };
+    try {
+      const response = enabled === undefined
+        ? await api.checkCalendar?.(command, controller.signal)
+        : await api.configureWatch?.(enabled ? { ...command, enabled: true, consent: true } : { ...command, enabled: false }, controller.signal);
+      if (!response || response.actionId !== command.actionId || controller.signal.aborted || verificationScopeRef.current !== scope) return;
+      setPlan((current) => {
+        if (!current.server || current.server.workspaceId !== command.workspaceId || current.server.revision !== command.baseRevision || current.server.conditionRevision !== command.conditionRevision) return current;
+        const currentAction = current.server.actions.find((item) => item.id === command.actionId);
+        if (!currentAction || latestCalendarAction(current.server)?.id !== command.actionId) return current;
+        if (currentAction.verification?.checkedAt && response.checkedAt && Date.parse(currentAction.verification.checkedAt) > Date.parse(response.checkedAt)) return current;
+        const server = { ...current.server, actions: current.server.actions.map((item) => item.id === response.actionId ? { ...item, verification: response } : item) };
+        return { ...current, server, external: planFromRecoveryView(server).external };
+      });
+      setMessage(response.message);
+    } catch (error) {
+      if (verificationScopeRef.current === scope) setMessage(recoveryFailureMessage(error, 'Calendar 상태를 확인하지 못했습니다. 처리 기록을 다시 확인해 주세요.'));
+    } finally {
+      window.clearTimeout(timer);
+      if (verificationRequestRef.current === controller) {
+        verificationRequestRef.current = null;
+        setBusyAction((current) => current === 'calendar-verification' ? null : current);
+      }
+    }
+  }
+
+  if (workspaceId && (!plan.server || plan.server.workspaceId !== workspaceId)) {
     return (
       <main className="recovery-page" aria-labelledby="recovery-loading-title">
         <nav className="recovery-nav" aria-label="일정 조정 화면 이동"><Link className="recovery-brand" to="/">이어짐 홈</Link><AccountLink /><Link to="/app">내 작업 공간</Link></nav>
@@ -506,13 +572,15 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
           <p className="recovery-kicker">{origin ? origin.sourceMode === 'fixture' ? '체험용 원문 · 직접 확인한 일정 조정' : '내 안내문 · 일정 조정' : '체험용 예시 · 일정 조정'}</p>
           <h1 id="recovery-title">일정 하나 바뀌었다고, 처음부터 다시 짜지 마세요.</h1>
           <p>
-            {origin ? `${origin.title}의 안내와 직접 확인한 시간으로 준비·이동·다른 일정을 함께 조정해요. 원래 안내와 계획은 별도로 남겨 둡니다.` : '금요일 발표가 16시에서 11시로 당겨졌어요. 오전 10시까지 자료도 내야 해요. 다른 약속을 지키면서 준비와 이동 시간을 확보할 수 있을까요? 준비된 데이터로 계산하는 체험이며, AI를 호출하지 않아요.'}
+            {origin ? `${origin.title}의 안내와 직접 확인한 시간으로 준비·이동·다른 일정을 함께 조정해요. 원래 안내와 계획은 별도로 남겨 둡니다.` : '발표가 5시간 당겨졌어요. 준비와 이동, 다른 업무까지 옮기면서 고정한 약속은 지키는 조정안을 확인해 보세요.'}
           </p>
           <div className="recovery-hero__badges" aria-label="일정 조정 상태 요약">
             <span><ShieldCheck size={15} aria-hidden="true" /> 고정 약속 변경 0개</span>
             <span><Clock3 size={15} aria-hidden="true" /> 준비 {plan.draft.preparationMinutes}분</span>
             <span data-state={isDirty ? 'dirty' : plan.feasible ? 'ready' : 'blocked'}><FileText size={15} aria-hidden="true" /> {isDirty ? '다시 계산 필요' : plan.feasible ? '조정안 확인됨' : '확인 필요'}</span>
           </div>
+          {!origin ? <p className="recovery-demo-note">준비된 이틀 일정으로 계산하는 체험이에요. AI 호출 없이 동작합니다.</p> : null}
+          <a className="recovery-result-link" href="#recovery-board-title">바뀐 일정 살펴보기 ↓</a>
           <div className="recovery-hero__actions">
             {!origin ? <button type="button" className="recovery-ghost recovery-future-button" onClick={startFuturePreview} disabled={isRequestBusy}>
               다음 목·금으로 새 체험
@@ -521,12 +589,13 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
             <a className="recovery-inline-link recovery-next-link" href="#recovery-actions-title">조정안 저장·적용으로 이동 ↓</a>
           </div>
         </div>
-        <NoticeCard plan={plan} />
+        <RecoveryImpact plan={plan} dirty={isDirty} evidence={<SourceEvidence plan={plan} />} />
       </section>
 
       {message ? <p className="recovery-message" role={saveStatus === 'failed' || !plan.feasible ? 'alert' : 'status'}>{message}</p> : null}
       {loading ? <p className="recovery-message" role="status">저장한 일정 조정안을 불러오는 중입니다.</p> : null}
       {previewStatus === 'previewing' ? <p className="recovery-message" role="status">변경한 조건을 같은 작업 공간에서 다시 계산하고 있습니다.</p> : null}
+      <RecoveryAssurance plan={plan} dirty={isDirty} />
 
       <section className="recovery-grid" aria-label="일정 조정 계획 검토">
         <aside className="recovery-controls" aria-labelledby="recovery-controls-title">
@@ -579,10 +648,14 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
             <strong data-feasible={plan.feasible && !isDirty}>{isDirty ? '재계산 필요' : plan.feasible ? '적용 가능' : '확인 필요'}</strong>
           </div>
           {isDirty ? <p className="recovery-draft-note" role="status">조건을 수정했습니다. 아래 일정은 마지막 계산 결과입니다. 다시 계산한 뒤 적용해 주세요.</p> : null}
-          <div className="recovery-timelines" data-feasible={plan.feasible}>
+          {plan.feasible ? <div className="recovery-view-switch" role="group" aria-label="일정 보기 선택">
+            <button type="button" aria-pressed={timelineView === 'after'} onClick={() => setTimelineView('after')}>조정안 보기</button>
+            <button type="button" aria-pressed={timelineView === 'before'} onClick={() => setTimelineView('before')}>변경 전 보기</button>
+          </div> : null}
+          <div className="recovery-timelines" data-feasible={plan.feasible} data-view={timelineView}>
             {!plan.feasible ? <aside className="recovery-violations"><h3>조건을 만족하는 새 일정이 없습니다.</h3><p>기존 일정은 그대로 유지됩니다. 아래에서 어떤 조건 때문에 막혔는지 확인해 주세요.</p></aside> : null}
-            <Timeline title="변경 전" events={plan.before} movedIds={[]} generic={Boolean(origin)} />
-            {plan.feasible ? <Timeline title="조건을 만족하는 일정 조정안" events={plan.after} movedIds={plan.movedEventIds} generic={Boolean(origin)} /> : null}
+            <Timeline view="before" title="변경 전" events={plan.before} movedIds={[]} generic={Boolean(origin)} />
+            {plan.feasible ? <Timeline view="after" title="조건을 만족하는 일정 조정안" events={plan.after} movedIds={plan.movedEventIds} generic={Boolean(origin)} /> : null}
           </div>
           {plan.violations.length > 0 ? <ViolationList plan={plan} /> : plan.feasible && !isDirty ? <SuccessSummary plan={plan} /> : null}
         </section>
@@ -614,7 +687,7 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
             {mode === 'persisted' ? (
               <button type="button" onClick={() => void approvePersistedPlan()} disabled={!canApprovePersisted || previewStatus === 'previewing'}>조정안 적용하기</button>
             ) : (
-              <button type="button" onClick={approveLocalPlan} disabled={!canApprove}>미리보기에서 적용</button>
+              <button type="button" className="recovery-secondary-button" onClick={approveLocalPlan} disabled={!canApprove}>미리보기에서 적용</button>
             )}
             {plan.approval.invalidatedReason ? <small>{plan.approval.invalidatedReason}</small> : null}
           </ActionCard>
@@ -645,6 +718,8 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
           </ActionCard>
           <ActionCard icon="mail" title="이메일" status={emailActionStatus(plan, hasGmailScope)} body="수신자, 제목, 본문을 화면에서 확정한 뒤에만 처리 목록에 넣습니다. 접수는 수신이나 열람을 뜻하지 않습니다.">
             {!hasGmailScope ? <button type="button" onClick={() => void connectCalendar(true)} disabled={calendar?.status !== 'connected' || isRequestBusy}>Gmail 권한 연결</button> : null}
+            <details className="recovery-email-disclosure">
+              <summary>이메일 작성·확인</summary>
             <EmailDraftPanel fields={emailFields} disabled={isRequestBusy} onChange={(next) => { setEmailTouched(true); setEmailExactApproved(false); setEmailFields(next); }} />
             <label className="recovery-exact-check">
               <input type="checkbox" checked={emailExactApproved} disabled={isRequestBusy || !emailValidation.ok} onChange={(event) => setEmailExactApproved(event.currentTarget.checked)} />
@@ -652,28 +727,21 @@ export default function RecoveryPage({ workspaceId, api = defaultRecoveryApi }: 
             </label>
             {!emailValidation.ok ? <small>{emailValidation.message}</small> : null}
             <button type="button" disabled={!canQueueEmail} onClick={() => void queueEmail()}>이메일 발송 작업 등록</button>
+            </details>
           </ActionCard>
         </div>
+        {verificationAction && api.checkCalendar && api.configureWatch ? <CalendarVerificationPanel
+          key={`${activeWorkspaceId}:${verificationAction.id}`}
+          action={verificationAction}
+          disabled={isRequestBusy}
+          canCheck={Boolean(plan.server && actionMatchesPlan(verificationAction, plan.server) && !isDirty && calendar?.status === 'connected')}
+          onCheck={() => void verifyCalendar(verificationAction)}
+          onWatch={(enabled) => void verifyCalendar(verificationAction, enabled)}
+        /> : null}
         <ActionLog actions={plan.server?.actions ?? []} />
         <p className="recovery-scope-note">{origin ? `${origin.sourceMode === 'live' ? '기존 AI 분석에서 확인한 안내' : origin.sourceMode === 'fixture' ? '체험용 원문' : '저장된 안내'}와 사용자가 직접 확인한 조건을 연결했습니다. 최대 48시간·30개 일정·이동 가능한 다른 업무 1개를 검증합니다. 원래 안내나 계획이 바뀌면 적용을 중단합니다. 이어짐 전용 Calendar에만 별도 확인한 일정의 개인 사본을 만듭니다.` : '준비된 데이터로 만든 이틀 일정 예시예요. 최대 30개 일정과 옮길 수 있는 다른 업무 1개를 계산해요. 새 안내문 분석이나 AI 호출은 하지 않아요.'}</p>
       </section>
     </main>
-  );
-}
-
-function NoticeCard({ plan }: { plan: RecoveryPlan }) {
-  return (
-    <article className="recovery-notice" aria-label="새 안내와 계산 결과">
-      <span>새 안내</span>
-      <blockquote>{plan.changedNotice.length > 400 ? `${plan.changedNotice.slice(0, 400)}…` : plan.changedNotice}</blockquote>
-      {plan.changedNotice.length > 400 ? <details className="recovery-evidence-details"><summary>원문 전체 보기</summary><p className="recovery-source-text">{plan.changedNotice}</p></details> : null}
-      <details className="recovery-evidence-details"><summary>어떤 근거로 연결했나요?</summary><SourceEvidence plan={plan} /></details>
-      <dl>
-        <div><dt>자료 준비</dt><dd>{plan.draft.preparationMinutes}분 연속</dd></div>
-        <div><dt>이동한 작업</dt><dd>{plan.summary.movedTask ?? '없음'}</dd></div>
-        <div><dt>보호 일정</dt><dd>{plan.summary.protectedCount}개 유지</dd></div>
-      </dl>
-    </article>
   );
 }
 
@@ -693,16 +761,19 @@ function SourceEvidence({ plan }: { plan: RecoveryPlan }) {
   );
 }
 
-function Timeline({ title, events, movedIds, generic = false }: { title: string; events: RecoveryEvent[]; movedIds: string[]; generic?: boolean }) {
-  const dates = [...new Set(events.map((event) => event.start.slice(0, 10)))].sort();
+function Timeline({ title, events, movedIds, generic = false, view }: { title: string; events: RecoveryEvent[]; movedIds: string[]; generic?: boolean; view: 'before' | 'after' }) {
+  // This is a calculated constraint, not an event from the baseline plan.
+  // Its blocking effect remains visible in the condition controls and violation list.
+  const baselineEvents = events.filter((event) => event.id !== 'event:counterfactual_1430_busy');
+  const dates = [...new Set(baselineEvents.map((event) => event.start.slice(0, 10)))].sort();
   return (
-    <section className="recovery-timeline" aria-labelledby={`${slug(title)}-title`}>
+    <section className="recovery-timeline" data-view={view} aria-labelledby={`${slug(title)}-title`}>
       <h3 id={`${slug(title)}-title`}>{title}</h3>
       {dates.map((day) => (
         <div className="recovery-day" key={day}>
           <strong>{calendarDayLabel(day)}</strong>
           <div>
-            {events.filter((event) => event.start.startsWith(day)).sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id)).map((event) => (
+            {baselineEvents.filter((event) => event.start.startsWith(day)).sort((a, b) => a.start.localeCompare(b.start) || a.id.localeCompare(b.id)).map((event) => (
               <article key={event.id} data-kind={event.kind} data-moved={event.moved || movedIds.includes(event.id)}>
                 <span>{timeOnly(event.start)}–{event.end.startsWith(day) ? '' : `${shortDate(event.end)} `}{timeOnly(event.end)}</span>
                 <b>{event.title}</b>
@@ -858,7 +929,7 @@ function emailActionStatus(plan: RecoveryPlan, hasGmailScope: boolean): External
 
 function calendarActionText(calendar: CalendarConnectionSummary | null, plan: RecoveryPlan): string {
   if (plan.external.calendar === 'pending') return '반영 작업을 처리 중입니다. 실제로 저장됐는지 확인하기 전까지 완료로 표시하지 않습니다.';
-  if (plan.external.calendar === 'applied') return '확인한 일정 값이 이어짐 전용 Calendar에 실제 저장됐습니다.';
+  if (plan.external.calendar === 'applied') return '반영 당시, 승인한 일정이 이어짐 전용 Calendar에 저장된 것을 재조회로 확인했습니다.';
   if (plan.external.calendar === 'needs_review') return '외부 상태가 바뀌었거나 확인이 불확실해 다시 검토해야 합니다.';
   if (!calendar || calendar.status === 'not_configured') return 'Google Calendar 설정이 준비되어야 연결할 수 있습니다.';
   if (calendar.status === 'connected') return '사용자가 따로 확인한 뒤 이어짐 전용 Calendar에만 반영합니다.';

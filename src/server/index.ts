@@ -8,6 +8,7 @@ import { generateProposal } from './model';
 import { collectOpsHealth } from './ops-health';
 import { durationSince, logCronEvent, logOpsHealthEvent, logRunEvent } from './telemetry';
 import { processRecoveryAction, recoverPendingRecoveryActions } from './recovery/actions';
+import { recoverCalendarVerifications } from './recovery/verification';
 import { cleanCalendarOAuthStates } from './calendar/store';
 
 const app = createApp();
@@ -202,6 +203,11 @@ export default {
       console.info(JSON.stringify({ event: 'recovery_outbox', ...result }));
     }).catch(() => {
       console.error(JSON.stringify({ event: 'recovery_outbox_failed' }));
+    }));
+    ctx.waitUntil(recoverCalendarVerifications(env).then((result) => {
+      console.info(JSON.stringify({ event: 'calendar_verification', ...result }));
+    }).catch(() => {
+      console.error(JSON.stringify({ event: 'calendar_verification_failed' }));
     }));
     ctx.waitUntil((async () => {
       const startedAt = Date.now();

@@ -104,6 +104,8 @@ export function ProductLanding() {
               </p>
             </div>
 
+            <MaterialsDemo />
+
             <article className="landing-crisis-card" aria-label="발표 자료 변경과 기존 준비">
               <div>
                 <span>새 안내</span>
@@ -132,7 +134,6 @@ export function ProductLanding() {
               </article>
             </div>
 
-            <MaterialsDemo />
           </section>
         </div>
       </section>
