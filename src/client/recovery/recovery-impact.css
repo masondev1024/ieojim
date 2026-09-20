@@ -1,0 +1,28 @@
+.recovery-impact {
+  min-width: 0;
+  padding: 22px 24px 12px;
+  border: 1px solid #cbdacf;
+  border-top: 3px solid var(--forest);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 8px 30px #183c2608;
+}
+.recovery-impact header > span { font-size: .75rem; font-weight: 700; color: var(--forest); }
+.recovery-impact h2 { margin: 6px 0 18px; font-size: 1.3rem; line-height: 1.4; letter-spacing: -.025em; }
+.recovery-impact ul { list-style: none; padding: 0; margin: 0; }
+.recovery-impact li { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
+.recovery-impact li > strong { font-size: .9rem; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
+.recovery-impact li > div { display: grid; gap: 4px; min-width: 0; font-variant-numeric: tabular-nums; }
+.recovery-impact__before { color: #68746d; font-size: .8rem; }
+.recovery-impact__after { display: flex; align-items: baseline; gap: 5px; color: #185740; font-size: .92rem; font-weight: 650; flex-wrap: wrap; }
+.recovery-impact__after svg { align-self: center; }
+.recovery-impact__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.recovery-impact__protected { display: flex; align-items: center; gap: 7px; margin: 14px 0 4px; padding: 11px 12px; background: var(--forest-soft); border-radius: 8px; color: #21543e; font-size: .86rem; font-weight: 600; }
+.recovery-impact blockquote { margin: 0 0 12px; padding-left: 12px; border-left: 3px solid #d8ac5a; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .9rem; line-height: 1.7; }
+.recovery-impact[data-state="dirty"], .recovery-impact[data-state="blocked"] { border-top-color: #a57934; }
+.recovery-impact__blocked { font-size: .95rem; line-height: 1.7; color: #73551e; }
+@media (max-width: 560px) {
+  .recovery-impact { padding: 18px 16px 10px; }
+  .recovery-impact li { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: 6px 12px; padding: 11px 0; }
+  .recovery-impact h2 { font-size: 1.18rem; margin-bottom: 12px; }
+}

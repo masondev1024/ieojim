@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Check the destination ref, including dev:main, force pushes, and deletions.
+while read -r local_ref local_oid remote_ref remote_oid
+do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    printf '%s\n' 'Push blocked: main must be updated through a pull request.' >&2
+    printf '%s\n' 'Push to dev or a feature branch, then open a PR to main.' >&2
+    exit 1
+  fi
+done
+
+exit 0

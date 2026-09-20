@@ -12,6 +12,7 @@ import { ApiException } from '../errors';
 import { jsonHash, randomId, sha256Hex } from '../crypto';
 import { nowIso, type AppBindings, type OwnerSession } from '../http';
 import { assertOriginStillCurrent, hasRecoveryOrigin, readOriginState, staleOriginResult } from './origin';
+import { readCalendarVerifications } from './verification';
 
 type Profile = {
   workspace_id: string; condition_revision: number; base_revision: number; base_source_revision: number;
@@ -49,8 +50,9 @@ export class RecoveryStore {
       (workspace.revision !== profile.base_revision && workspace.revision !== profile.applied_revision);
     const result: RecoveryResult = !originState.current ? staleOriginResult() :
       stale ? { status: 'missing_information', code: 'stale_workspace', message: '계획이나 원문이 바뀌었습니다. 이전 일정 조정안은 다시 사용할 수 없습니다.', blockers: [] } : repairSchedule(input);
-    const actions = await this.env.DB.prepare('SELECT id, kind, status, message, created_at AS createdAt, progress_json, payload_json FROM recovery_actions WHERE workspace_id = ? AND owner_id = ? ORDER BY created_at DESC, id DESC LIMIT 25')
+    const actions = await this.env.DB.prepare('SELECT id, kind, status, message, created_at AS createdAt, base_revision AS baseRevision, source_revision AS sourceRevision, condition_revision AS conditionRevision, progress_json, payload_json FROM recovery_actions WHERE workspace_id = ? AND owner_id = ? ORDER BY created_at DESC, id DESC LIMIT 25')
       .bind(workspaceId, ownerId).all<RecoveryActionView & { progress_json: string; payload_json: string }>();
+    const verifications = await readCalendarVerifications(this.env.DB, ownerId, workspaceId);
     return {
       workspaceId, revision: workspace.revision, sourceRevision: workspace.sourceRevision,
       conditionRevision: profile.condition_revision, input, result, proposalId: profile.proposal_id,
@@ -59,7 +61,8 @@ export class RecoveryStore {
         if (action.kind !== 'calendar') return action;
         const progress = JSON.parse(progress_json) as { completed?: Record<string, unknown> };
         const payload = JSON.parse(payload_json) as { events?: unknown[] };
-        return { ...action, verifiedEvents: Object.keys(progress.completed ?? {}).length, totalEvents: payload.events?.length ?? 0 };
+        return { ...action, verifiedEvents: Object.keys(progress.completed ?? {}).length, totalEvents: payload.events?.length ?? 0,
+          ...(verifications.has(action.id) ? { verification: verifications.get(action.id) } : {}) };
       }),
       ...(originState.origin ? { origin: originState.origin } : {}),
     };

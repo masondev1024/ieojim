@@ -1,5 +1,6 @@
 import type { CalendarBootstrapResponse, CalendarConnectResponse, CalendarConnectionSummary, CalendarDisconnectResponse } from '../../core/calendar-contracts';
 import type { RecoveryView } from '../../core/recovery-api-contracts';
+import type { CalendarVerificationView, CheckCalendarVerificationCommand, ConfigureCalendarWatchCommand } from '../../core/recovery-verification-contracts';
 import type { RecoveryInput } from '../../core/scheduling-contracts';
 import type { RecoveryApiFailure } from './recovery-types';
 
@@ -16,9 +17,21 @@ export type RecoveryApi = {
   bootstrapCalendar: (signal?: AbortSignal) => Promise<CalendarBootstrapResponse>;
   adoptCalendar: (input: { calendarId: string }, signal?: AbortSignal) => Promise<CalendarConnectionSummary>;
   disconnectCalendar: (signal?: AbortSignal) => Promise<CalendarDisconnectResponse>;
+  checkCalendar?: (input: CheckCalendarVerificationCommand & { workspaceId: string }, signal?: AbortSignal) => Promise<CalendarVerificationView>;
+  configureWatch?: (input: ConfigureCalendarWatchCommand & { workspaceId: string }, signal?: AbortSignal) => Promise<CalendarVerificationView>;
 };
 
 export const defaultRecoveryApi: RecoveryApi = {
+  async checkCalendar({ workspaceId, ...command }, signal) {
+    return readJson<CalendarVerificationView>(`/api/workspaces/${encodeURIComponent(workspaceId)}/recovery/verification`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(command), signal,
+    });
+  },
+  async configureWatch({ workspaceId, ...command }, signal) {
+    return readJson<CalendarVerificationView>(`/api/workspaces/${encodeURIComponent(workspaceId)}/recovery/watch`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(command), signal,
+    });
+  },
   async loadWorkspaceRecovery(workspaceId, signal) {
     return readJson<RecoveryView>(`/api/workspaces/${encodeURIComponent(workspaceId)}/recovery`, { signal });
   },

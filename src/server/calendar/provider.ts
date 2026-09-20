@@ -29,6 +29,7 @@ type GoogleProviderOptions = {
 
 const eventResponseSchema = z.object({
   id: z.string(),
+  status: z.string().optional(),
   etag: z.string(),
   summary: z.string(),
   description: z.string().optional(),
@@ -41,6 +42,11 @@ const eventResponseSchema = z.object({
   reminders: z.object({ useDefault: z.boolean().optional(), overrides: z.array(z.unknown()).optional() }).passthrough().optional(),
   htmlLink: z.string().url().optional(),
 }).passthrough();
+
+const eventReadResponseSchema = z.union([
+  z.object({ id: z.string().min(1), status: z.literal('cancelled') }).passthrough(),
+  eventResponseSchema,
+]);
 
 const freeBusyResponseSchema = z.object({
   calendars: z.record(z.string(), z.object({
@@ -118,7 +124,10 @@ export function createGoogleCalendarProvider(options: GoogleProviderOptions): Ca
     },
 
     async getEvent(calendarId: string, eventId: string): Promise<CalendarProviderResult<CalendarEventRead>> {
-      return requestJson(fetcher, eventUrl(calendarId, eventId), { method: 'GET', headers: headers(), redirect: 'manual' }, eventResponseSchema, normalizeEvent);
+      return requestJson(fetcher, eventUrl(calendarId, eventId), { method: 'GET', headers: headers(), redirect: 'manual' }, eventReadResponseSchema, (wire) => {
+        if (wire.status === 'cancelled') throw new ProviderNormalizationError('not_found', 'Provider event was cancelled.');
+        return normalizeEvent(eventResponseSchema.parse(wire));
+      });
     },
 
     async insertEvent(calendarId: string, event: CalendarEventWrite): Promise<CalendarProviderResult<CalendarEventRead>> {
@@ -204,6 +213,8 @@ async function requestJson<TWire, TValue>(
 }
 
 function normalizeEvent(wire: z.infer<typeof eventResponseSchema>): CalendarEventRead {
+  if (wire.status === 'cancelled') throw new ProviderNormalizationError('not_found', 'Provider event was cancelled.');
+  if (wire.status !== undefined && wire.status !== 'confirmed') throw new ProviderNormalizationError('conflict', 'Provider event is no longer confirmed.');
   if ((wire.attendees?.length ?? 0) > 0 || wire.reminders?.useDefault === true || (wire.reminders?.overrides?.length ?? 0) > 0) {
     throw new ProviderNormalizationError('conflict', 'Provider event now contains attendees or reminders outside Ieojim control.');
   }
@@ -283,7 +294,7 @@ function eventUrl(calendarId: string, eventId: string): string {
 function statusKind(status: number): CalendarProviderFailure['error']['kind'] {
   if (status === 401) return 'reauth_required';
   if (status === 403) return 'forbidden';
-  if (status === 404) return 'not_found';
+  if (status === 404 || status === 410) return 'not_found';
   if (status === 409) return 'duplicate';
   if (status === 412) return 'stale';
   return 'unknown';

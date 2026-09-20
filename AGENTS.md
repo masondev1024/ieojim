@@ -40,6 +40,7 @@ The dated winner evidence and adoption decisions live in `docs/research/ai-compe
 
 ## Authority boundaries
 
+- Develop on `dev` or a task branch. Update `main` only through an authorized PR; never bypass the local push guard. Check `docs/operations/branch-workflow.md` for the actual server-protection status and hook setup for a new clone.
 - Work in this project; do not change global instructions, model settings, plugins, or MCP configuration for convenience.
 - No commits, pushes, PRs, public deployment, account creation, or paid infrastructure changes without the applicable user approval. Prepare concrete reviewable artifacts before requesting an external action.
 - Never send messages to others on the user's behalf without explicit authorization.

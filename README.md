@@ -11,6 +11,7 @@
 - 기술: TypeScript, React/Vite, Hono, Cloudflare Workers, D1, Queues, Google OAuth/Calendar, Gemini generateContent
 - 상세 포트폴리오 문서: [엔지니어링 케이스 스터디](docs/portfolio/engineering-case-study.md)
 - 구현 상태와 검증 기록: [PLANS.md](PLANS.md)
+- 브랜치 운영과 보호 상태: [브랜치 운영](docs/operations/branch-workflow.md)
 
 ## 문제
 
@@ -68,6 +69,7 @@ flowchart LR
 - **이력과 복원**: 복원도 새 내용 버전을 만듭니다. 인증·비용 장부·원문 목록·만료 시각은 복원 대상에서 제외합니다.
 - **비용과 불확실성 제어**: 모델 호출 예산을 먼저 예약하고 실제 사용량을 기록합니다. 예약액은 공급자 청구의 강제 상한은 아닙니다. 결과를 알 수 없는 유료 호출은 자동 재시도하지 않습니다.
 - **승인된 업무 실행**: Calendar·메일 실행 요청을 별도 outbox에 저장합니다. Calendar는 권한·일정 충돌·고정 이벤트 ID·etag를 확인하고, 반영 후 재조회합니다. 실제 검증 범위는 아래에 구분했습니다.
+- **승인 이후 상태 확인**: 9월 19일 로컬 후보에서는 실행 이력과 이후 Calendar 관찰을 분리했습니다. 사용자 동의로 최대 24시간 읽기 전용 확인을 예약하고, 외부 변경·기준 변경·연결 해제를 만나면 멈춥니다. 중복 cron과 늦은 응답은 DB claim과 조건부 갱신으로 제어합니다. [설계](docs/design/change-assurance-2026-09-19.md) · [운영과 수동 확인](docs/operations/calendar-verification-2026-09-19.md)
 
 ## 검증 근거
 
@@ -116,5 +118,6 @@ npm run release:prepare
 
 - Spark, Airflow, Kafka, dbt, Iceberg 기반 분석 플랫폼은 아닙니다. 이 프로젝트의 DE 가치는 운영 데이터 정합성과 복구 가능성에 있습니다.
 - Calendar는 한 번의 실제 승인 실행에서 합성 일정 4건을 반영·재조회했습니다. 9월 16일에는 전체 Google 연동 검증을 다시 수행하지 않았으며, 실제 메일 발송은 미검증입니다.
+- 9월 19일 재확인 기능은 로컬 구현·검증 범위입니다. 실제 Google 자동 확인과 원격 배포는 별도 인수 작업입니다. 예약은 15분 간격이며 처리량에 따라 지연될 수 있습니다.
 - 자연어 날짜를 구조화하는 능력은 완전하지 않습니다. 확인 가능한 날짜 정보가 없으면 원문 근거를 보존하고 사용자가 확인해야 합니다.
 - 장기 보관 정책, 계정 전체 삭제, 유료 요금제, 외부 알림 연결, 장기간 운영 관찰은 후속 작업입니다.

@@ -48,9 +48,9 @@
   .workspace-start .start-intro { position: static; }
 }
 @media (max-width: 720px) {
-  .workspace-app-home .workspace-topbar { display: flex; align-items: center; gap: 12px; }
+  .workspace-app.workspace-app-home .workspace-topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-block: 12px; }
   .workspace-app-home .workspace-topbar .status-cluster { justify-content: flex-end; }
-  .workspace-app-home .workspace-topbar .status-pill.live { display: none; }
+  .workspace-app.workspace-app-home .workspace-topbar .status-pill { display: none; }
   .workspace-app .workspace-start { grid-template-columns: 1fr; width: calc(100% - 32px); margin-top: 12px; gap: 20px; }
   .workspace-start {
     .start-intro { padding: 12px 4px 0; }

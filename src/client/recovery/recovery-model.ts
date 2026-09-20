@@ -3,6 +3,7 @@ import { repairSchedule } from '../../core/schedule-repair';
 import { formatLocalMinute, parseLocalMinute } from '../../core/scheduling-contracts';
 import type { RecoveryAction, RecoveryInput, RecoveryResult, ScheduleEvent } from '../../core/scheduling-contracts';
 import type { RecoveryActionView, RecoveryDraft, RecoveryPlan, RecoveryView } from './recovery-types';
+import { actionMatchesPlan, calendarNeedsReview, latestCalendarAction } from './recovery-assurance';
 
 export const defaultRecoveryDraft: RecoveryDraft = {
   preparationMinutes: 90,
@@ -153,7 +154,7 @@ function planFromInputResult(input: RecoveryInput, result: RecoveryResult, optio
       calendarActions: ready ? result.actions.filter((action) => action.kind === 'reschedule').length : 0,
       draftRecipients: origin ? [] : ['발표 담당자', '참석자'],
     },
-    external: actionStatuses(options.view?.actions ?? []),
+    external: actionStatuses(options.view?.actions ?? [], options.view),
     approval: { approved: options.applied, approvedAt: options.applied ? new Date().toISOString() : null, invalidatedReason: null },
     server: options.view,
   };
@@ -177,10 +178,11 @@ function draftFromInput(input: RecoveryInput): RecoveryDraft {
   };
 }
 
-function actionStatuses(actions: RecoveryActionView[]): RecoveryPlan['external'] {
-  const calendar = latestAction(actions, 'calendar');
+function actionStatuses(actions: RecoveryActionView[], view?: RecoveryView): RecoveryPlan['external'] {
+  const calendar = view ? latestCalendarAction(view) : latestAction(actions, 'calendar');
   const email = latestAction(actions, 'email');
-  return { calendar: toExternalStatus(calendar?.status), email: toExternalStatus(email?.status) };
+  const staleCalendar = calendar && view && calendar.baseRevision !== undefined && !actionMatchesPlan(calendar, view);
+  return { calendar: staleCalendar || calendarNeedsReview(calendar) ? 'needs_review' : toExternalStatus(calendar?.status), email: toExternalStatus(email?.status) };
 }
 
 function latestAction(actions: RecoveryActionView[], kind: RecoveryActionView['kind']): RecoveryActionView | null {

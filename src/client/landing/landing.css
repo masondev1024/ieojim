@@ -777,18 +777,29 @@
   }
 
   .product-landing .landing-nav {
-    min-height: 72px;
-    align-items: flex-start;
-    padding-top: 18px;
+    display: grid;
+    min-height: auto;
+    align-items: start;
+    padding-top: 16px;
+    padding-bottom: 14px;
   }
 
   .product-landing .landing-nav-actions {
-    justify-content: flex-end;
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
     font-size: 0.8rem;
   }
 
+  .product-landing .landing-nav-actions::-webkit-scrollbar {
+    display: none;
+  }
+
   .product-landing .landing-nav-actions a {
+    flex: 0 0 auto;
     padding: 8px 7px;
   }
 
@@ -821,10 +832,8 @@
   .product-landing .landing-secondary-action,
   .product-landing .landing-tertiary-action { justify-content: flex-start; min-height: 44px; font-size: .9rem; }
 
-  .product-landing .landing-outcome-strip {
-    grid-template-columns: 1fr;
-    margin-top: 30px;
-  }
+  /* The same outcome is explained in the adjacent interactive example. */
+  .product-landing .landing-outcome-strip { display: none; }
 
   .product-landing .landing-outcome-strip div + div {
     border-top: 1px solid var(--landing-border-dark);
@@ -886,8 +895,7 @@
   }
 
   .product-landing .landing-nav-actions {
-    max-width: 190px;
-    flex-wrap: wrap;
+    max-width: 100%;
   }
 
   .product-landing .landing-story-board {

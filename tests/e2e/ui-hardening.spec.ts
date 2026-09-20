@@ -20,12 +20,21 @@ for (const width of [1440, 1024, 768, 390, 320]) {
   test(`recovery time ranges remain readable without splitting at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/recovery');
-    const times = page.locator('.recovery-day article > span');
-    await expect(times).toHaveCount(16);
+    await expect(page.locator('.recovery-day article > span')).toHaveCount(16);
     await page.evaluate(() => document.fonts.ready);
-    for (const time of await times.all()) {
-      expect(await textLineCount(time), await time.textContent() ?? 'time range').toBe(1);
-      expect(await time.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    const views = width <= 560 ? ['조정안 보기', '변경 전 보기'] : [null];
+    for (const view of views) {
+      if (view) {
+        const button = page.getByRole('button', { name: view, exact: true });
+        await button.click();
+        await expect(button).toHaveAttribute('aria-pressed', 'true');
+      }
+      const times = page.locator('.recovery-day article > span:visible');
+      await expect(times).toHaveCount(width <= 560 ? 8 : 16);
+      for (const time of await times.all()) {
+        expect(await textLineCount(time), await time.textContent() ?? 'time range').toBe(1);
+        expect(await time.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+      }
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
@@ -48,8 +57,18 @@ test('recovery navigation and condition toggles have usable touch targets after 
   await expect(page.getByRole('heading', { name: '지금 조건에서는 적용할 수 없습니다.' })).toBeVisible();
 });
 
+test('recovery progress band stays aligned with the product content width', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/recovery');
+  const heroBox = (await page.locator('.recovery-hero').boundingBox())!;
+  const assuranceBox = (await page.locator('.recovery-assurance').boundingBox())!;
+  expect(Math.round(assuranceBox.x)).toBe(Math.round(heroBox.x));
+  expect(Math.round(assuranceBox.width)).toBe(Math.round(heroBox.width));
+});
+
 test('exact email approval follows its readable fields in the same action panel', async ({ page }) => {
   await page.goto('/recovery');
+  await page.getByText('이메일 작성·확인', { exact: true }).click();
   const checkbox = page.getByLabel('표시된 수신자, 제목, 본문 그대로 확인');
   await expect(checkbox).toBeVisible();
   const panel = page.locator('.recovery-action-card').filter({ has: checkbox });
@@ -68,10 +87,18 @@ test('recovery comparison reflows for enlarged text without clipping times or fi
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  for (const time of await page.locator('.recovery-day article > span').all()) {
-    expect(await textLineCount(time)).toBe(1);
-    expect(await time.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  for (const view of ['조정안 보기', '변경 전 보기']) {
+    const button = page.getByRole('button', { name: view, exact: true });
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    const times = page.locator('.recovery-day article > span:visible');
+    await expect(times).toHaveCount(8);
+    for (const time of await times.all()) {
+      expect(await textLineCount(time)).toBe(1);
+      expect(await time.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    }
   }
+  await page.getByText('이메일 작성·확인', { exact: true }).click();
   const recipient = page.getByLabel('수신자', { exact: true });
   const box = (await recipient.boundingBox())!;
   expect(box.x).toBeGreaterThanOrEqual(0);

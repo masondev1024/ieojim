@@ -1,0 +1,33 @@
+.source-clipboard-import {
+  display: grid;
+  gap: 10px;
+}
+
+.source-clipboard-import__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.source-clipboard-import__preview {
+  display: grid;
+  gap: 10px;
+}
+
+.source-clipboard-import__preview textarea {
+  min-height: 150px;
+  resize: vertical;
+  white-space: pre-wrap;
+}
+
+.source-clipboard-import__preview .primary-action {
+  width: fit-content;
+}
+
+@media (max-width: 520px) {
+  .source-clipboard-import__actions,
+  .source-clipboard-import__actions .ghost-button,
+  .source-clipboard-import__preview .primary-action {
+    width: 100%;
+  }
+}
