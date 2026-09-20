@@ -1,8 +1,8 @@
 # 이어짐 — AI Championship 제출 가이드
 
-갱신일: 2026-09-15. 이 문서는 Wanted AI Championship 2026 과제 제출 폼을 위에서 아래로 채우기 위한 현재 기준이다. 공개 서비스 주소는 `https://ieojim.jungseongheon.org`이고, 현재 공개 Worker 버전은 `57b36613-b7fd-4069-864d-f62444ed0232`다.
+갱신일: 2026-09-20. 이 문서는 Wanted AI Championship 2026 제출 화면과 공개 서비스의 현재 사실을 기록한다. 공개 서비스 주소는 `https://ieojim.jungseongheon.org`이고, 현재 공개 Worker 버전은 `938a8b1a-0dac-4eef-a8f9-ce0a2e4d17a4`다.
 
-Wanted 내 과제 화면에서 "임시 저장" 상태를 확인했다. 제목, 문제, React/Gemini 선택은 저장돼 있다. 실제 Calendar 검증 결과를 포함한 392자 AI 설명을 Wanted에 저장했고, 수정 화면을 다시 열어 저장값을 확인했다. 서비스 URL도 저장 후 다시 열어 확인했다. 이미지는 0개이며, Chrome `setFiles` 대표 이미지 재시도는 file URL 접근 권한 문제로 `Not allowed`가 발생했다. 아직 최종 제출 완료 상태가 아니므로 투표·심사 대상이라고 말하지 않는다.
+Wanted `내 과제`의 미리보기와 편집 화면을 2026-09-20에 다시 확인했다. 기존 프로젝트는 이미 제출되어 편집 화면의 최종 동작이 `제출하기`가 아닌 `수정하기`로 표시된다. 저장된 서비스 URL은 canonical domain이며, 대표 이미지 1장과 보조 스크린샷 4장이 렌더링된다. 따라서 중복 제출이나 제출 내용 변경은 하지 않았다.
 
 ## 1. 대표 이미지
 
@@ -16,17 +16,17 @@ docs/submission/assets/2026-09-15/01-hero.png
 
 ## 2. 제목
 
-> 이어짐 — 새 안내를 반영해도, 내 결정은 이어집니다
+> 이어짐 — 일정 하나 바뀌었다고, 처음부터 다시 짜지 마세요
 
 ## 3. 해결하고자 한 문제
 
-> 새 안내가 올 때마다 일정·비용·준비 목록을 다시 맞추며 확정한 결정과 완료 기록을 놓치는 문제를 해결합니다.
+> 미팅·과제·여행 안내가 바뀔 때마다 일정·비용·준비 목록을 다시 맞추다가, 이미 정한 약속과 끝낸 준비를 놓치는 문제
 
 ## 4. AI 활용 방식 및 결과
 
-아래 본문은 artifact 기준 **392자**이며 폼의 500자 제한 이내다.
+저장된 본문은 편집 화면 기준 **446자**이며 폼의 500자 제한 이내다.
 
-> 개발에는 Codex를 활용해 설계·구현·독립 리뷰·회귀 검증을 반복했습니다. 서비스의 Gemini는 새 안내문에서 변경 사실과 원문 근거를 구조화합니다. TypeScript 엔진은 근거·계산·기준 버전을 검증하고, 잠근 약속이나 완료한 준비 삭제처럼 보호 상태와 충돌하면 사용자 선택을 받습니다. 직접 쓴 메모와 준비 설정은 보존하고 확인이 필요한 부분을 표시합니다. 승인한 변경만 저장하며 이력 복원도 가능합니다. 별도의 합성 일정 체험에서는 발표 시간 변경이 준비·이동·다른 업무에 미치는 영향을 계산하고, 불가능한 조건은 승인을 차단합니다. 합성 체험과 실제 AI 호출을 구분해 제공합니다. 승인된 예시 일정 4건은 전용 Google Calendar에 실제 반영하고 재조회로 일치를 확인했습니다.
+> 발표 시간이 당겨지면 이동과 준비 업무도 함께 바뀝니다. 이어짐은 이런 변경을 반영하면서 이미 정한 약속과 끝낸 준비를 지키는 데 집중했습니다. Gemini가 새 안내문에서 변경 내용과 근거 문장을 찾고, TypeScript 코드가 근거·계산·계획 버전을 검증합니다. 고정한 일정이나 완료한 할 일과 충돌하면 사용자에게 확인하고, 직접 쓴 메모와 준비 설정은 유지합니다. 승인한 변경만 저장하며 이전 내용으로 복원할 수도 있습니다. 별도의 체험용 예시에서는 발표 시간 변경에 맞춰 준비·이동·다른 업무를 조정하고, 불가능한 조건은 적용을 막습니다. 체험과 실제 AI 분석은 구분해 표시했습니다. 승인한 예시 일정 4건은 이어짐 전용 Google Calendar에 실제 등록하고 다시 조회해 일치를 확인했습니다. 개발에는 Codex를 활용해 설계·구현·별도 에이전트 리뷰·회귀 테스트를 반복했습니다.
 
 과장해서 쓰지 말아야 할 내용:
 
@@ -38,14 +38,15 @@ docs/submission/assets/2026-09-15/01-hero.png
 
 ## 5. 사용 AI 툴 및 기술 스택
 
-체크박스 목록에서는 아래 두 개를 선택한다.
+현재 제출 화면의 체크박스에는 아래 세 항목이 선택돼 있다.
 
 ```text
 React
+ChatGPT
 Gemini
 ```
 
-Codex는 개발 과정에서 사용했으므로 AI 활용 본문에 적는다. 제출 폼의 체크박스가 ChatGPT와 Codex를 구분하지 못하더라도, 실제 사용 근거 없이 ChatGPT, Claude, Cursor, GitHub Copilot, v0, Vercel, Supabase, OpenRouter, LangChain, Pinecone 등을 추가 선택하지 않는다.
+Codex는 개발 과정에서 사용했으므로 AI 활용 본문에 명시했다. 그 외 선택되지 않은 도구는 실제 사용 근거 없이 추가하지 않는다.
 
 추가 자유 입력이 가능하면 아래처럼 적는다.
 
@@ -67,7 +68,7 @@ ZIP 파일:
 docs/submission/ieojim-submission-images.zip
 ```
 
-개별 파일은 `docs/submission/assets/2026-09-15/` 아래에 있다. 모두 공개 배포 `db8aea67-3e79-48c6-9d3f-7bb6017f837c`에서 촬영한 1600×900 PNG다. 현재 런타임은 Calendar scope 수정 후 `57b36613-b7fd-4069-864d-f62444ed0232`로 올라갔지만, 제출 이미지는 기존 db8 공개 화면의 실제 캡처라는 provenance를 유지한다.
+개별 파일은 `docs/submission/assets/2026-09-15/` 아래에 있다. 모두 공개 배포 `db8aea67-3e79-48c6-9d3f-7bb6017f837c`에서 촬영한 1600×900 PNG다. 제출 화면에는 1번을 대표 이미지로, 2–5번을 보조 스크린샷으로 저장했다. 현재 런타임은 `938a8b1a-0dac-4eef-a8f9-ce0a2e4d17a4`지만, 제출 이미지는 기존 공개 화면의 실제 캡처라는 provenance를 유지한다.
 
 | 순서 | 업로드 파일 | 보여주는 가치 |
 | --- | --- | --- |
@@ -77,7 +78,7 @@ docs/submission/ieojim-submission-images.zip
 | 4 | `04-coordination-review.png` | 원문 변경, 잠근 보고, 완료한 인쇄 확인을 사용자가 직접 검토 |
 | 5 | `05-coordination-approved-plan.png` | 승인 후 저장된 계획과 보호된 준비 설정 |
 
-대표 이미지는 1번을 사용하고, 스크린샷 영역에는 1~5번을 순서대로 올린다. 현재 원티드 임시저장에는 이미지가 0개다. 업로드가 계속 `Not allowed`로 막히면 Chrome 확장 프로그램의 file URL 접근 권한을 허용한 뒤 같은 파일로 다시 시도한다.
+대표 이미지는 1번을 사용하고, 스크린샷 영역에는 2–5번을 순서대로 저장했다. 2026-09-20 편집 화면과 미리보기에서 모두 렌더링됨을 확인했다.
 
 ## 8. 심사위원에게 보여줄 3분 체험
 
@@ -88,15 +89,15 @@ docs/submission/ieojim-submission-images.zip
 5. 불가능한 조건에서는 승인을 차단하고, 어떤 조건이 막혔는지 표시되는지 확인한다.
 6. 실제 원문 기반 workspace에서는 변경 검토 화면에서 잠근 약속과 완료한 준비 삭제가 사용자 선택을 요구하는지 확인한다.
 
-Calendar 실증은 전용 Ieojim 보조 Calendar에서만 완료됐다. Chrome에서 Google 동의 후 `/recovery?calendar=connected`로 돌아왔고, 전용 Calendar bootstrap, 서버 승인, Calendar 등록 1회, provider 재조회가 성공했다. 검증 workspace `ws_abca3006940c453fa9bbbb3f18a863b8`, action `rec_act_eec51a41ddb94a40935afbb65098ba04`, verified mappings 4개가 근거다. 이 fixture와 합성 개인 사본 4개는 사용자 확인용으로 운영자 계정에 남겼다. Google 기본 Calendar 변경, Gmail 권한 추가, Gmail 발송은 수행하지 않았다.
+Calendar 실증은 전용 Ieojim 보조 Calendar에서만 완료됐다. 2026-09-20의 새 미래 날짜 체험은 Calendar에 합성 개인 사본 4건을 쓰고 처리 직후 재조회 **4/4**, 이후 사용자가 누른 별도 재조회 **4/4** 일치를 기록했다. 반복 감시는 opt-in 상태로 꺼져 있으며, Google 기본 Calendar 변경, Gmail 권한 추가, Gmail 발송은 수행하지 않았다.
 
-## 9. 제출 버튼 전 확인
+## 9. 제출 완료 확인
 
-- Wanted 임시저장 상태가 아니라 제출 완료 상태인지 확인한다.
-- 대표 이미지 1장과 스크린샷 5장이 모두 업로드됐는지 확인한다.
-- 서비스 URL이 `https://ieojim.jungseongheon.org`인지 확인한다.
-- 업로드 후 미리보기에서 16:9 비율, 글자 가독성, 잘림을 확인한다.
-- 폼 마감은 사용자가 확인한 기준으로 2026-09-20이다. 마감 후 수정할 수 없으므로 제출 완료 화면을 보관한다.
+- [x] 편집 화면이 `수정하기` 상태여서 임시저장이 아닌 제출 완료 상태임을 확인했다.
+- [x] 대표 이미지 1장과 보조 스크린샷 4장이 미리보기에서 렌더링된다.
+- [x] 서비스 URL은 `https://ieojim.jungseongheon.org`이다.
+- [x] 제출 완료 이후에는 불필요한 공개 폼 수정이나 중복 제출을 하지 않는다.
+- 폼 마감은 사용자 확인 기준으로 2026-09-20이다. 마감 후에도 Worker/D1/Queue와 custom domain을 유지한다.
 - 제출 후에는 Worker/D1/Queue를 삭제하거나 custom domain을 바꾸지 않는다.
 
 ## 검증 근거
@@ -113,4 +114,6 @@ Calendar 실증은 전용 Ieojim 보조 Calendar에서만 완료됐다. Chrome�
 - Calendar scope 통합 테스트: `artifacts/submission-release-2026-09-15/calendar-scope-after.log`, 4/4 PASS
 - 독립 리뷰: root handoff 기준 Calendar scope 수정 APPROVE
 - Calendar 실연결: `artifacts/submission-release-2026-09-15/calendar-live-verified.json`, action verified, mappings 4
+- 2026-09-20 release: protected PR #1 merge; migration0013 applied; Worker `938a8b1a-0dac-4eef-a8f9-ce0a2e4d17a4`; public-domain Playwright 27/27
+- 2026-09-20 Calendar acceptance: future synthetic events 4/4 immediate provider readback and 4/4 explicit later recheck matched; watch off; no Gmail scope or delivery
 - Google 설정: `artifacts/submission-release-2026-09-15/google-setup.json`, Calendar callback/API/scope 설정 완료, Calendar consent/write/readback 검증 완료, Gmail 미시도
